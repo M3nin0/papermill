@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Deduce parameters of a notebook from the parameters cell."""
-import click
 from pathlib import Path
+
+import click
 
 from .iorw import get_pretty_path, load_notebook_node, local_file_io_cwd
 from .log import logger
@@ -19,13 +20,15 @@ def _open_notebook(notebook_path, parameters):
         return load_notebook_node(input_path)
 
 
-def _infer_parameters(nb):
+def _infer_parameters(nb, tag_name="parameters"):
     """Infer the notebook parameters.
 
     Parameters
     ----------
     nb : nbformat.NotebookNode
         Notebook
+    tag_name : string, optional
+        cell tag name
 
     Returns
     -------
@@ -34,7 +37,7 @@ def _infer_parameters(nb):
     """
     params = []
 
-    parameter_cell_idx = find_first_tagged_cell_index(nb, "parameters")
+    parameter_cell_idx = find_first_tagged_cell_index(nb, tag_name)
     if parameter_cell_idx < 0:
         return params
     parameter_cell = nb.cells[parameter_cell_idx]
@@ -99,7 +102,7 @@ def display_notebook_help(ctx, notebook_path, parameters):
     return 0
 
 
-def inspect_notebook(notebook_path, parameters=None):
+def inspect_notebook(notebook_path, parameters=None, tag_name="parameters"):
     """Return the inferred notebook parameters.
 
     Parameters
@@ -108,6 +111,8 @@ def inspect_notebook(notebook_path, parameters=None):
         Path to notebook
     parameters : dict, optional
         Arbitrary keyword arguments to pass to the notebook parameters
+    tag_name : string, optional
+        cell tag name
 
     Returns
     -------
@@ -119,5 +124,5 @@ def inspect_notebook(notebook_path, parameters=None):
 
     nb = _open_notebook(notebook_path, parameters)
 
-    params = _infer_parameters(nb)
+    params = _infer_parameters(nb, tag_name)
     return {p.name: p._asdict() for p in params}
